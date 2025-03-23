@@ -63,6 +63,86 @@
             <p id="compatibilityResult"></p>
             <p id="finalMessage"></p>
         </div>
+ const QUESTIONS = [
+    { id: 'q1', question: 'Do you like outdoor activities?' },
+    { id: 'q2', question: 'Do you enjoy cooking?' },
+    { id: 'q3', question: 'Are you a night owl?' },
+    { id: 'q4', question: 'Do you prefer traveling?' },
+    { id: 'q5', question: 'Do you like pets?' }
+];
+
+const POINTS_MAP = {
+    1: 0,  // Strongly Disagree
+    2: 10, // Disagree
+    3: 15, // Neutral
+    4: 20, // Agree
+    5: 20  // Strongly Agree (changed to 20 points)
+};
+
+// Function to validate the answers
+function validate() {
+    let score = 0;
+    let valid = true;
+    let errorMessage = "";
+
+    QUESTIONS.forEach((q, index) => {
+        const selectedAnswer = document.querySelector(`input[name="${q.id}"]:checked`);
+        
+        if (!selectedAnswer) {
+            valid = false;
+            errorMessage += `You must answer question ${index + 1}.<br>`;
+        } else {
+            score += POINTS_MAP[parseInt(selectedAnswer.value)];
+        }
+    });
+
+    return { valid, score, errorMessage };
+}
+
+document.getElementById('compatibilityForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const { valid, score, errorMessage } = validate();
+
+    document.getElementById('result').style.display = 'none';
+
+    if (!valid) {
+        document.getElementById('compatibilityResult').innerHTML = '';
+        document.getElementById('finalMessage').innerHTML = `<span id="error">${errorMessage}</span>`;
+    } else {
+        const percentage = (score / 100) * 100; // Max score is 100 (5 * 20)
+
+        document.getElementById('compatibilityResult').innerHTML = `
+            <p>Compatibility score for each question:</p>
+            <ul>
+                ${QUESTIONS.map((q, index) => {
+                    const selectedAnswer = document.querySelector(`input[name="${q.id}"]:checked`);
+                    const answer = selectedAnswer ? selectedAnswer.value : "N/A";
+                    const points = POINTS_MAP[parseInt(answer)];
+                    return `<li>${q.question}: ${answer} (Points: ${points})</li>`;
+                }).join('')}
+            </ul>
+            <p>Total compatibility score: ${score} / 100</p>
+            <p>Overall compatibility: ${percentage}%</p>
+        `;
+
+        let message = "";
+        if (percentage > 80) {
+            message = "You're highly compatible!";
+        } else if (percentage > 50) {
+            message = "You're somewhat compatible!";
+        } else {
+            message = "There's some room for improvement!";
+        }
+
+        document.getElementById('finalMessage').innerHTML = `<strong>${message}</strong>`;
+
+        // Show result
+        document.getElementById('result').style.display = 'block';
+    }
+});
+    
+    
     </div>
 
     <script src="script.js"></script>
